@@ -1,0 +1,289 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   TikTok Video Downloader
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: "Poppins", sans-serif;
+    }
+    .popup-enter {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .popup-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 300ms ease, transform 300ms ease;
+    }
+    .popup-exit {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .popup-exit-active {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 300ms ease, transform 300ms ease;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .spinner {
+      border: 3px solid transparent;
+      border-top-color: #fbbf24; /* yellow-400 */
+      border-radius: 50%;
+      width: 1.25rem; /* 20px */
+      height: 1.25rem;
+      animation: spin 1s linear infinite;
+    }
+  </style>
+ </head>
+ <body class="bg-gray-900 min-h-screen flex flex-col">
+  <header class="flex items-center justify-center px-5 py-4 bg-gray-800 shadow-sm">
+   <div class="flex items-center space-x-3">
+    <img alt="Logo" class="w-10 h-10 rounded-full" height="40" src="https://cloudgood.xyz/file/w4TsSx7.png" width="40"/>
+    <h1 class="text-gray-100 text-xl font-semibold tracking-wide select-none">
+     TikTok Downloader
+    </h1>
+   </div>
+  </header>
+  <main class="flex-grow flex flex-col items-center justify-center px-5 py-10 max-w-lg mx-auto w-full">
+   <h2 class="text-gray-100 text-3xl md:text-4xl font-extrabold mb-5 text-center leading-tight select-none">
+    Download TikTok Videos
+    <br/>
+    Without Watermark
+   </h2>
+   <p class="text-gray-300 text-base md:text-lg mb-8 text-center max-w-md select-none">
+    Paste the TikTok video link below and get your video downloaded instantly
+      in high quality.
+   </p>
+   <form autocomplete="off" class="w-full flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto" id="download-form" novalidate="" onsubmit="return false">
+    <input aria-label="TikTok video URL input" autocapitalize="none" autocorrect="off" class="flex-grow rounded-md px-4 py-3 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-0 max-w-full" id="tiktok-url" placeholder="Paste TikTok video URL here" required="" spellcheck="false" type="url"/>
+    <button aria-label="Download TikTok video button" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-md px-6 py-3 shadow-md transition flex items-center justify-center gap-2 whitespace-nowrap" id="download-btn" type="submit">
+     <i class="fas fa-download fa-lg"></i>
+     <span id="btn-text">Download</span>
+    </button>
+   </form>
+   <section aria-atomic="true" aria-live="polite" class="mt-10 w-full bg-gray-800 rounded-md p-5 hidden flex-col items-center max-w-md mx-auto" id="result-section" role="region">
+    <h3 class="text-gray-100 text-xl font-semibold mb-4 select-none">
+     Your Download
+    </h3>
+    <video aria-label="Preview of the TikTok video to download" class="rounded-md max-w-full max-h-80 shadow-md" controls="" id="video-preview" playsinline="" preload="metadata">
+     <source src="" type="video/mp4"/>
+     Your browser does not support the video tag.
+    </video>
+    <a class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-md px-6 py-3 shadow-md transition inline-flex items-center gap-2 whitespace-nowrap" download="" href="#" id="download-link" role="button" tabindex="0">
+     <i class="fas fa-file-download fa-lg"></i>
+     Download Video
+    </a>
+   </section>
+   <section class="mt-14 bg-gray-800 rounded-md p-6 max-w-md w-full text-gray-300 select-none">
+    <h3 class="text-yellow-400 text-2xl font-bold mb-4 text-center">
+     Features
+    </h3>
+    <ul class="space-y-4 list-disc list-inside text-gray-300 text-base">
+     <li>
+      Fast and easy TikTok video downloads without watermark
+     </li>
+     <li>
+      High quality video output for all downloads
+     </li>
+     <li>
+      No app installation required, works directly in your browser
+     </li>
+     <li>
+      Supports all TikTok video URLs, including user profiles and posts
+     </li>
+     <li>
+      Completely free to use with no hidden fees
+     </li>
+     <li>
+      Secure and private, no data is stored or shared
+     </li>
+    </ul>
+   </section>
+  </main>
+  <footer class="bg-gray-800 text-gray-400 text-center py-5 select-none">
+   <p>
+    © 2025 TikTok Downloader. All rights reserved.
+   </p>
+  </footer>
+  <!-- Popup Overlay -->
+  <div aria-hidden="true" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 opacity-0 pointer-events-none" id="popup-overlay">
+   <div aria-describedby="popup-desc" aria-labelledby="popup-title" aria-modal="true" class="bg-gray-800 rounded-lg max-w-md w-full mx-4 p-6 relative transform opacity-0 translate-y-5" id="popup" role="dialog">
+    <button aria-label="Close popup" class="absolute top-3 right-3 text-gray-400 hover:text-yellow-400 transition" id="popup-close">
+     <i class="fas fa-times fa-lg"></i>
+    </button>
+    <img alt="TikTok video cover image" class="w-full rounded-md mb-4 object-cover max-h-60 mx-auto" height="360" id="popup-cover" src="https://storage.googleapis.com/a1aa/image/1063ffd6-17b9-4da7-6030-e19cfcd1e2f6.jpg" width="360"/>
+    <p class="text-gray-300 text-sm md:text-base mb-6 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-500 scrollbar-track-gray-700" id="popup-caption">
+    </p>
+    <div class="flex justify-center gap-6">
+     <a class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-md px-6 py-3 shadow-md transition inline-flex items-center gap-2 whitespace-nowrap flex-1 justify-center text-center" download="tiktok-video.mp4" href="#" id="popup-video-btn" role="button" tabindex="0">
+      <i class="fas fa-video fa-lg"></i>
+      Video
+     </a>
+     <a class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold rounded-md px-6 py-3 shadow-md transition inline-flex items-center gap-2 whitespace-nowrap flex-1 justify-center text-center" download="tiktok-audio.mp3" href="#" id="popup-audio-btn" role="button" tabindex="0">
+      <i class="fas fa-music fa-lg"></i>
+      Audio
+     </a>
+    </div>
+   </div>
+  </div>
+  <script>
+   const form = document.getElementById("download-form");
+   const urlInput = document.getElementById("tiktok-url");
+   const resultSection = document.getElementById("result-section");
+   const videoPreview = document.getElementById("video-preview");
+   const downloadLink = document.getElementById("download-link");
+   const downloadBtn = document.getElementById("download-btn");
+   const btnText = document.getElementById("btn-text");
+
+   const popupOverlay = document.getElementById("popup-overlay");
+   const popup = document.getElementById("popup");
+   const popupCloseBtn = document.getElementById("popup-close");
+   const popupCover = document.getElementById("popup-cover");
+   const popupCaption = document.getElementById("popup-caption");
+   const popupVideoBtn = document.getElementById("popup-video-btn");
+   const popupAudioBtn = document.getElementById("popup-audio-btn");
+
+   function showPopup() {
+     popupOverlay.style.pointerEvents = "auto";
+     popupOverlay.classList.remove("opacity-0");
+     popupOverlay.classList.add("opacity-100");
+     popup.classList.remove("opacity-0", "translate-y-5");
+     popup.classList.add("opacity-100", "translate-y-0");
+   }
+
+   function hidePopup() {
+     popup.classList.remove("opacity-100", "translate-y-0");
+     popup.classList.add("opacity-0", "translate-y-5");
+     popupOverlay.classList.remove("opacity-100");
+     popupOverlay.classList.add("opacity-0");
+     popupOverlay.style.pointerEvents = "none";
+   }
+
+   popupCloseBtn.addEventListener("click", () => {
+     hidePopup();
+   });
+
+   popupOverlay.addEventListener("click", (e) => {
+     if (e.target === popupOverlay) {
+       hidePopup();
+     }
+   });
+
+   function isValidTikTokUrl(url) {
+     const regex = /^(https?:\/\/)?(www\.|m\.|vm\.)?tiktok\.com\/.+|https?:\/\/vm\.tiktok\.com\/.+/i;
+     return regex.test(url);
+   }
+
+   async function fetchTikTokVideo(url) {
+     if (!isValidTikTokUrl(url)) {
+       throw new Error("Invalid TikTok URL");
+     }
+     const apiUrl = `https://apii.baguss.web.id/downloader/ttdl?apikey=bagus&url=${encodeURIComponent(
+       url
+     )}`;
+     const response = await fetch(apiUrl);
+     if (!response.ok) {
+       throw new Error("Failed to fetch video data");
+     }
+     const data = await response.json();
+     if (!data.success) {
+       throw new Error("API returned unsuccessful response");
+     }
+     return data;
+   }
+
+   function setLoading(isLoading) {
+     if (isLoading) {
+       downloadBtn.disabled = true;
+       btnText.textContent = "";
+       if (!downloadBtn.querySelector(".spinner")) {
+         const spinner = document.createElement("span");
+         spinner.className = "spinner";
+         spinner.setAttribute("aria-label", "Loading");
+         downloadBtn.insertBefore(spinner, btnText);
+       }
+     } else {
+       downloadBtn.disabled = false;
+       btnText.textContent = "Download";
+       const spinner = downloadBtn.querySelector(".spinner");
+       if (spinner) {
+         spinner.remove();
+       }
+     }
+   }
+
+   form.addEventListener("submit", async (e) => {
+     e.preventDefault();
+     const url = urlInput.value.trim();
+     if (!url) return;
+
+     downloadLink.classList.add("opacity-50", "pointer-events-none");
+     downloadLink.removeAttribute("href");
+     videoPreview.src = "";
+     resultSection.classList.add("hidden");
+
+     setLoading(true);
+
+     try {
+       const data = await fetchTikTokVideo(url);
+
+       const videoUrl = data.video.nowatermark_hd || data.video.nowatermark || "";
+       if (videoUrl) {
+         videoPreview.src = videoUrl;
+         downloadLink.href = videoUrl;
+         downloadLink.download = "tiktok-video.mp4";
+         downloadLink.innerHTML =
+           '<i class="fas fa-file-download fa-lg"></i> Download Video';
+         resultSection.classList.remove("hidden");
+         downloadLink.classList.remove("opacity-50", "pointer-events-none");
+       } else {
+         videoPreview.src = "";
+         downloadLink.href = "#";
+         downloadLink.classList.add("opacity-50", "pointer-events-none");
+         downloadLink.textContent = "Download Video";
+         resultSection.classList.add("hidden");
+       }
+
+       popupCover.src = data.cover || "https://placehold.co/360x360/png?text=Cover+Image+Placeholder";
+       popupCover.alt = `Cover image for TikTok video titled: ${data.title || "No title available"}`;
+       popupCaption.textContent = data.title || "No caption available";
+
+       if (videoUrl) {
+         popupVideoBtn.href = videoUrl;
+         popupVideoBtn.download = "tiktok-video.mp4";
+         popupVideoBtn.classList.remove("opacity-50", "pointer-events-none");
+       } else {
+         popupVideoBtn.href = "#";
+         popupVideoBtn.classList.add("opacity-50", "pointer-events-none");
+       }
+
+       if (data.music) {
+         popupAudioBtn.href = data.music;
+         popupAudioBtn.download = "tiktok-audio.mp3";
+         popupAudioBtn.classList.remove("opacity-50", "pointer-events-none");
+       } else {
+         popupAudioBtn.href = "#";
+         popupAudioBtn.classList.add("opacity-50", "pointer-events-none");
+       }
+
+       showPopup();
+     } catch (error) {
+       alert(error.message || "An error occurred");
+       downloadLink.textContent = "Download Video";
+     } finally {
+       setLoading(false);
+     }
+   });
+  </script>
+ </body>
+</html>
