@@ -1,0 +1,143 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Figure Style Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #000; color: #fff; }
+    @keyframes fadeInScale { 0% {opacity:0;transform:scale(0.9);} 100% {opacity:1;transform:scale(1);} }
+    @keyframes fadeOutScale { 0% {opacity:1;transform:scale(1);} 100% {opacity:0;transform:scale(0.9);} }
+    .animate-fadeInScale { animation: fadeInScale 0.3s ease forwards; }
+    .animate-fadeOutScale { animation: fadeOutScale 0.3s ease forwards; }
+    @keyframes overlayFadeIn { 0% {opacity:0;} 100% {opacity:0.7;} }
+    @keyframes overlayFadeOut { 0% {opacity:0.7;} 100% {opacity:0;} }
+    .overlay-fadeIn { animation: overlayFadeIn 0.3s ease forwards; }
+    .overlay-fadeOut { animation: overlayFadeOut 0.3s ease forwards; }
+    .spinner { border:4px solid rgba(255,255,255,0.2); border-top-color:#fff; border-radius:50%; width:48px;height:48px;animation:spin 1s linear infinite;}
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-black text-white">
+
+  <div class="max-w-md w-full bg-gradient-to-b from-white/10 via-white/5 to-white/10 rounded-3xl shadow-2xl p-10 flex flex-col items-center space-y-8">
+    <h1 class="text-4xl font-extrabold text-center tracking-tight text-white drop-shadow-md">Figure Style Converter</h1>
+    <p class="text-center text-white/70 leading-relaxed max-w-sm">
+      Upload your photo and get a modern figure style conversion instantly.
+    </p>
+    <label for="photoInput" class="cursor-pointer w-full rounded-3xl border-2 border-dashed border-white/40 hover:border-white transition-colors duration-300 p-12 flex flex-col items-center justify-center space-y-6 select-none bg-white/5 hover:bg-white/10">
+      <i class="fas fa-cloud-upload-alt fa-5x text-white/70"></i>
+      <span class="text-xl font-semibold text-white/90">Upload File</span>
+      <input type="file" id="photoInput" accept="image/*" class="hidden" />
+    </label>
+    <div id="progressLog" class="mt-6 min-h-[2.5rem] flex items-center justify-center"></div>
+  </div>
+
+  <!-- Result Modal -->
+  <div id="resultModal" class="fixed inset-0 flex items-center justify-center hidden z-50 p-6">
+    <div id="modalOverlay" class="absolute inset-0 bg-black bg-opacity-90 overlay-fadeIn"></div>
+    <div class="relative bg-white bg-opacity-10 backdrop-blur-md rounded-3xl max-w-md w-full p-8 shadow-lg animate-fadeInScale z-10 flex flex-col items-center">
+      <button id="closeResultBtn" class="absolute top-5 right-5 text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-white rounded">
+        <i class="fas fa-times fa-lg"></i><span class="sr-only">Close modal</span>
+      </button>
+      <h2 class="text-3xl font-extrabold text-center text-white mb-6 tracking-tight drop-shadow-md">Your Converted Figure Style</h2>
+      <img id="resultImage" src="" alt="Converted figure style in modern black and white artistic style" class="rounded-2xl shadow-lg max-h-[28rem] object-contain w-full mb-6 border border-white/20" />
+      <p class="text-center text-white/70 text-sm max-w-xs leading-relaxed mb-6">
+        To download the image, tap the download button below.
+      </p>
+      <button id="downloadBtn" class="px-6 py-3 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-2xl shadow-md flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-white transition">
+        <i class="fas fa-download"></i>
+        <span>Download Image</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const photoInput = document.getElementById("photoInput");
+    const progressLog = document.getElementById("progressLog");
+    const resultModal = document.getElementById("resultModal");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const resultImage = document.getElementById("resultImage");
+    const closeResultBtn = document.getElementById("closeResultBtn");
+    const modalContent = resultModal.querySelector('div.relative');
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    function clearLog() { progressLog.innerHTML = ""; }
+    function showSpinner() { clearLog(); const spinner=document.createElement("div"); spinner.className="spinner"; spinner.setAttribute("aria-label","Loading"); progressLog.appendChild(spinner);}
+    function showMessage(message,status="pending"){
+      clearLog();
+      const div=document.createElement("div");
+      div.className="flex items-center justify-center space-x-2 font-semibold";
+      if(status==="success"){
+        div.classList.add("text-white");
+        div.innerHTML=`<i class="fas fa-check-circle"></i><span>${message}</span>`;
+      } else if(status==="error"){
+        div.classList.add("text-red-500");
+        div.innerHTML=`<i class="fas fa-exclamation-circle"></i><span>${message}</span>`;
+      } else {
+        div.classList.add("text-white/80");
+        div.innerHTML=`<i class="fas fa-spinner fa-spin"></i><span>${message}</span>`;
+      }
+      progressLog.appendChild(div);
+    }
+    function openModal(){
+      resultModal.classList.remove("hidden");
+      modalOverlay.classList.remove("overlay-fadeOut");
+      modalOverlay.classList.add("overlay-fadeIn");
+      modalContent.classList.remove("animate-fadeOutScale");
+      modalContent.classList.add("animate-fadeInScale");
+      closeResultBtn.focus();
+    }
+    function closeModal(){
+      modalOverlay.classList.remove("overlay-fadeIn");
+      modalOverlay.classList.add("overlay-fadeOut");
+      modalContent.classList.remove("animate-fadeInScale");
+      modalContent.classList.add("animate-fadeOutScale");
+      setTimeout(()=>{
+        resultModal.classList.add("hidden");
+        if(resultImage.src.startsWith("blob:")) URL.revokeObjectURL(resultImage.src);
+        resultImage.src="";
+        photoInput.value="";
+        clearLog();
+      },300);
+    }
+
+    async function startProcess(file){
+      if(!file) return;
+      showSpinner();
+      const formData=new FormData();
+      formData.append("file",file);
+      try{
+        const res=await fetch("https://goodplay.xyz/tofigur.php",{method:"POST",body:formData});
+        if(!res.ok) throw new Error("Failed to reach backend");
+        const blob=await res.blob();
+        const imageUrl=URL.createObjectURL(blob);
+        showMessage("Conversion successful","success");
+        resultImage.src=imageUrl;
+        openModal();
+      }catch(err){
+        showMessage("Error: "+err.message,"error");
+        console.error(err);
+      }
+    }
+
+    photoInput.addEventListener("change",()=>{if(photoInput.files.length) startProcess(photoInput.files[0]);});
+    closeResultBtn.addEventListener("click",closeModal);
+    resultModal.addEventListener("click",e=>{if(e.target===resultModal||e.target===modalOverlay) closeModal();});
+    document.addEventListener("keydown",e=>{if(!resultModal.classList.contains("hidden")&&e.key==="Escape") closeModal();});
+
+    downloadBtn.addEventListener("click", () => {
+      if (!resultImage.src) return;
+      const link = document.createElement("a");
+      link.href = resultImage.src;
+      link.download = "converted-figure-style.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+
+</body>
+</html>
